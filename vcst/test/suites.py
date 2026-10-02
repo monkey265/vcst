@@ -127,6 +127,7 @@ class CocoTestRun(TestRun):
         return results
 
     def _simulate(self, output_path):
+        print(f"Seed for {self._test_suite_name}: {self.get_seed()}")
         config = self._config.copy()
         self.configure_simulator(config)
         with simulation_env(self.create_environ(output_path)):
