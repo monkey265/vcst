@@ -56,8 +56,8 @@ def test_modelsim_vhdl_flags_use_fli():
 
 
 def test_modelsim_verilog_flags_use_vpi():
-    pli, lib = get_sim_flags("modelsim", vhdl=False)["modelsim.vsim_flags"]
-    assert pli == "-pli" and lib.endswith("libcocotbvpi_modelsim.so")
+    (lib,) = get_sim_flags("modelsim", vhdl=False)["pli"]  # VUnit's pli option quotes the path for Tcl
+    assert lib.endswith("libcocotbvpi_modelsim.so")
 
 
 def test_unsupported_simulator_is_an_error():

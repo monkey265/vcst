@@ -12,6 +12,7 @@ from cocotb_tools.config import lib_entry, lib_name_path, pygpi_entry_point
 
 from vunit.test.report import PASSED, SKIPPED, FAILED
 from vunit.ostools import write_file
+from vunit.sim_if.vsim_simulator_mixin import fix_path
 from vunit.test.suites import IndependentSimTestCase, TestRun, get_result_file_name as get_vunit_result_file_name
 
 # VUnit's run_env hooks are registered per simulator, not per test, and tests run in threads.
@@ -178,17 +179,18 @@ def get_sim_flags(simulator_name, vhdl):
 
     if simulator_name == "modelsim":
         if vhdl:
-            # VUnit space-joins vsim_flags into a Tcl eval, so the -foreign value needs Tcl braces.
-            return {"modelsim.vsim_flags": ["-foreign", f"{{cocotb_init {lib_name_path('fli', 'questa')}}}"]}
-        return {"modelsim.vsim_flags": ["-pli", str(lib_name_path("vpi", "questa"))]}
+            # VUnit space-joins vsim_flags into a Tcl eval, so the -foreign value needs Tcl braces and
+            # forward slashes. The VPI library goes through VUnit's pli option, which quotes it for Tcl.
+            fli_lib = lib_name_path("fli", "questa").as_posix()
+            return {"modelsim.vsim_flags": ["-foreign", f"{{cocotb_init {fli_lib}}}"]}
+        return {"pli": [lib_name_path("vpi", "questa").as_posix()]}
 
     if simulator_name == "rivierapro":
         flags = ["+access", "+w", "-interceptcoutput", "-O2"]
         if vhdl:
-            flags += [f"-loadvhpi {lib_entry('vhpi', 'riviera')}"]  # needs lib:entry_function
-        else:
-            flags += [f"-pli {lib_name_path('vpi', 'riviera')}"]
-        return {"rivierapro.vsim_flags": flags}
+            # needs lib:entry_function; quoted for Tcl like VUnit's own Riviera-Pro pli option
+            return {"rivierapro.vsim_flags": flags + [f'-loadvhpi "{fix_path(lib_entry("vhpi", "riviera"))}"']}
+        return {"rivierapro.vsim_flags": flags, "pli": [lib_name_path("vpi", "riviera").as_posix()]}
 
     raise RuntimeError(f"vcst does not support cocotb tests on simulator {simulator_name!r}")
 
