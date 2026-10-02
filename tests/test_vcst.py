@@ -200,3 +200,11 @@ def test_cocotb_seed_from_hex_and_free_form_vunit_seeds():
 def test_user_cocotb_random_seed_is_kept(monkeypatch, tmp_path):
     monkeypatch.setenv("COCOTB_RANDOM_SEED", "255")
     assert "COCOTB_RANDOM_SEED" not in make_run("nvc").create_environ(str(tmp_path))
+
+
+def test_riviera_generics_quote_strings_and_format_lists():
+    from vcst.ui import format_riviera_generic
+
+    assert format_riviera_generic(8) == "8"
+    assert format_riviera_generic("fast") == '"fast"'
+    assert format_riviera_generic([1, (2, 3), "a"]) == '(1,(2,3),"a")'

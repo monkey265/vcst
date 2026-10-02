@@ -1,9 +1,27 @@
+import vunit.sim_if.rivierapro
 from vunit import VUnit
 from vunit.sim_if.hooks import register_hooks
 
 from .library import VCSTLibrary
 from ..test.suites import cocotb_run_env
 from ..utils.mod_utils import import_mod
+
+
+def format_riviera_generic(value):
+    """
+    Quote string generics, which Riviera-Pro needs for string types, and format lists and tuples as VHDL
+    aggregates. VUnit has no hook for this, so it replaces VUnit's formatting as vcst always has.
+    """
+    if not isinstance(value, str):
+        try:
+            return "(" + ",".join(format_riviera_generic(item) for item in value) + ")"
+        except TypeError:  # not iterable
+            pass
+    value_str = str(value)
+    return f'"{value_str}"' if isinstance(value, str) or " " in value_str else value_str
+
+
+vunit.sim_if.rivierapro.format_generic = format_riviera_generic
 
 
 class VCST(VUnit):
