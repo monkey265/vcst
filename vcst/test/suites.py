@@ -105,8 +105,9 @@ class CocoTestRun(TestRun):
         if not self._config.call_pre_config(output_path, self._simulator_if.output_path, self.get_seed()):
             return results
 
-        # VUnit's vsim run script reads its own results file, as for a VUnit testbench
-        write_file(get_vunit_result_file_name(output_path), "")
+        # VUnit's vsim run script reads its own results file and reports a failure unless the test suite
+        # is marked done. The cocotb results file decides the outcome, so mark it done up front.
+        write_file(get_vunit_result_file_name(output_path), "test_suite_done\n")
 
         sim_ok = self._simulate(output_path)
 

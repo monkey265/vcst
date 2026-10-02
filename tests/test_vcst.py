@@ -5,13 +5,14 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import cocotb
 import find_libpython
 import pytest
 from vunit.test.report import FAILED, PASSED, SKIPPED
 
 import vcst
 from vcst import VCST
-from vcst.test.bench import CocoTest
+from vcst.test.bench import CocoTest, CocoTestBench
 from vcst.test.suites import CocoTestRun, cocotb_run_env, get_sim_flags, simulation_env
 
 EXAMPLES = Path(__file__).parent / "vhdl"
@@ -170,3 +171,17 @@ def test_cocotb_fullname_uses_simulator_module_name():
     imported = CocoTest(cocotb_test("common_tests"), design_unit, module, "/x/hdl/test_adder")
     assert own._cocotb_fullname == "test_adder.basic"
     assert imported._cocotb_fullname == "common_tests.basic"
+
+
+def test_duplicate_cocotb_test_names_are_an_error():
+    async def basic(dut):
+        pass
+
+    imported = cocotb.test(basic)
+    imported.module = "common_tests"
+    module = SimpleNamespace(__name__="test_adder", top_level="adder", basic=cocotb.test(basic), other=imported)
+    design_unit = SimpleNamespace(file_name="adder.vhd", is_entity=True, name="adder")
+    bench = CocoTestBench.__new__(CocoTestBench)
+    bench.design_unit = design_unit
+    with pytest.raises(RuntimeError, match="Duplicate cocotb test name"):
+        bench.discover_cocotb_tests(module, "/x/hdl/test_adder")

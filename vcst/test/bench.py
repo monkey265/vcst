@@ -51,6 +51,8 @@ class CocoTestBench(TestBench):
                 continue
 
             for cocotb_test in cocotb_tests:
+                if any(test.name == cocotb_test.name for test in tests):
+                    raise RuntimeError(f"Duplicate cocotb test name {cocotb_test.name!r} in {cocotb_module_location}")
                 coco_test = CocoTest(cocotb_test, self.design_unit, cocotb_module, cocotb_module_location)
                 for attr in getattr(obj, "attributes", []):
                     coco_test.add_attribute(CocoTestAttribute(attr, None))
