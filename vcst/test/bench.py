@@ -50,7 +50,7 @@ class CocoTestBench(TestBench):
                 continue
 
             for cocotb_test in cocotb_tests:
-                coco_test = CocoTest(cocotb_test.name, self.design_unit, cocotb_module, cocotb_module_location)
+                coco_test = CocoTest(cocotb_test, self.design_unit, cocotb_module, cocotb_module_location)
                 for attr in getattr(obj, "attributes", []):
                     coco_test.add_attribute(CocoTestAttribute(attr, None))
                 tests.append(coco_test)
@@ -82,13 +82,15 @@ class CocoTestBench(TestBench):
 
 
 class CocoTest(Test):
-    def __init__(self, name, design_unit, cocotb_module, cocotb_module_location):
+    def __init__(self, cocotb_test, design_unit, cocotb_module, cocotb_module_location):
         # offset, length, lineno set to None
-        Test.__init__(self, name, FileLocation(design_unit.file_name, None, None, None))
+        Test.__init__(self, cocotb_test.name, FileLocation(design_unit.file_name, None, None, None))
         self._top_level = cocotb_module.top_level
         self._vhdl = design_unit.is_entity
         self._cocotb_module = cocotb_module
         self._cocotb_module_location = cocotb_module_location
+        # Module the test function is defined in, which differs from cocotb_module for imported tests
+        self._cocotb_fullname = cocotb_test.fullname
 
 
 class CocoTestConfigurationVisitor(TestConfigurationVisitor):

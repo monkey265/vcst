@@ -46,6 +46,7 @@ class IndependentCocoSimTestCase(IndependentSimTestCase):
             config=config,
             elaborate_only=elaborate_only,
             cocotb_module_location=test._cocotb_module_location,
+            cocotb_fullnames=[test._cocotb_fullname],
             test_suite_name=self._name,
             test_cases=[test.name],
             seed=seed,
@@ -53,9 +54,10 @@ class IndependentCocoSimTestCase(IndependentSimTestCase):
 
 
 class CocoTestRun(TestRun):
-    def __init__(self, *, vhdl, top_level, cocotb_module_location, **kwargs):
+    def __init__(self, *, vhdl, top_level, cocotb_module_location, cocotb_fullnames, **kwargs):
         TestRun.__init__(self, **kwargs)
         self._cocotb_module_location = cocotb_module_location
+        self._cocotb_fullnames = cocotb_fullnames
         self._top_level = top_level
         self._vhdl = vhdl
 
@@ -63,7 +65,7 @@ class CocoTestRun(TestRun):
         """Environment variables cocotb needs inside the simulator process."""
         mod_dir, mod_name = os.path.split(self._cocotb_module_location)
         python_path = os.environ.get("PYTHONPATH")
-        test_filter = "|".join(re.escape(f"{mod_name}.{name}") for name in self._test_cases)
+        test_filter = "|".join(re.escape(fullname) for fullname in self._cocotb_fullnames)
 
         environ = {
             "PYTHONPATH": str(mod_dir) if not python_path else f"{python_path}{os.pathsep}{mod_dir}",
@@ -71,6 +73,7 @@ class CocoTestRun(TestRun):
             "COCOTB_RESULTS_FILE": get_result_file_name(output_path),
             "COCOTB_TEST_MODULES": mod_name,
             "COCOTB_TEST_FILTER": f"^({test_filter})$",
+            "COCOTB_RANDOM_SEED": str(int(self.get_seed(), 16)),
             "COCOTB_TOPLEVEL": self._top_level.lower() if self._vhdl else self._top_level,
             "TOPLEVEL_LANG": "vhdl" if self._vhdl else "verilog",
         }

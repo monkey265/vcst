@@ -8,6 +8,7 @@ from types import SimpleNamespace
 import pytest
 from vunit.test.report import FAILED, PASSED, SKIPPED
 
+import vcst
 from vcst import VCST
 from vcst.test.suites import CocoTestRun, cocotb_run_env, get_sim_flags, simulation_env
 
@@ -27,12 +28,13 @@ def make_run(simulator_name, vhdl=True, top_level="ADDER"):
         vhdl=vhdl,
         top_level=top_level,
         cocotb_module_location=str(Path("/tests/hdl/test_adder")),
+        cocotb_fullnames=["common.basic"],
         simulator_if=SimpleNamespace(name=simulator_name),
         config=FakeConfig(),
         elaborate_only=False,
         test_suite_name="lib.adder.basic",
         test_cases=["basic"],
-        seed=None,
+        seed="00000000000000ff",
     )
 
 
@@ -73,7 +75,8 @@ def test_create_environ(simulator_name, tmp_path):
     env = make_run(simulator_name).create_environ(str(tmp_path))
     assert env["COCOTB_TEST_MODULES"] == "test_adder"
     assert env["COCOTB_TOPLEVEL"] == "adder"
-    assert env["COCOTB_TEST_FILTER"] == r"^(test_adder\.basic)$"
+    assert env["COCOTB_TEST_FILTER"] == r"^(common\.basic)$"  # defined in another module than test_adder
+    assert env["COCOTB_RANDOM_SEED"] == "255"
     assert env["COCOTB_RESULTS_FILE"] == str(tmp_path / "cocotb_results.xml")
     assert env["PYTHONPATH"].split(os.pathsep)[-1] == str(Path("/tests/hdl"))
     assert env["PYGPI_PYTHON_BIN"] == sys.executable
@@ -136,3 +139,11 @@ def test_read_test_results_maps_cocotb_outcomes(tmp_path):
         "skipped": SKIPPED,
         "not_run": SKIPPED,
     }
+
+
+def test_vcst_test_decorator_with_and_without_arguments():
+    async def check(dut):
+        pass
+
+    assert vcst.test(check).attributes == []
+    assert vcst.test(attributes=[".slow"])(check).attributes == [".slow"]
