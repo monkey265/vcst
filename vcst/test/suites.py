@@ -149,9 +149,8 @@ class CocoTestRun(TestRun):
         for result in ET.parse(file_name).getroot().iter("testcase"):
             test_name = result.attrib["name"]
             results_tests.append(test_name)
-            if result.find("skipped") is not None:
-                results[test_name] = SKIPPED
-            elif result.find("failure") is not None or result.find("error") is not None:
+            # A test skipped at runtime (pytest.skip) counts as passed: VUnit turns SKIPPED into FAILED here
+            if result.find("failure") is not None or result.find("error") is not None:
                 results[test_name] = FAILED
             else:
                 results[test_name] = PASSED

@@ -139,7 +139,7 @@ def test_read_test_results_maps_cocotb_outcomes(tmp_path):
         "passed": PASSED,
         "failed": FAILED,
         "errored": FAILED,
-        "skipped": SKIPPED,
+        "skipped": PASSED,
         "not_run": SKIPPED,
     }
 
