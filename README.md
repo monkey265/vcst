@@ -11,7 +11,7 @@ VCST seeks to combine the best of both worlds. This includes inheriting VUnit's 
 The goal of VCST is to provide a proof of example concept of VUnit and Cocotb working together without a single source change to other project. This will provide a couple of benefits. First, it is an interim solutions for VUnit and Cocotb users. Second, it will shed some light on what works could be done to make cooctb and vunit even more modular. Third, it has given me an opportunity to dig more into how these tools work so I can contribute more to these amazing tools.
 
 ## Simulator Support
-VCST requires VUnit 5 (`vunit-hdl>=5.0.0.dev13`) and cocotb 2.x. The supported simulators, selected with VUnit's `VUNIT_SIMULATOR` environment variable, are:
+VCST requires VUnit 5 (`vunit-hdl>=5.0.0.dev13`) and cocotb 2.1 or newer (`cocotb>=2.1`). The supported simulators, selected with VUnit's `VUNIT_SIMULATOR` environment variable, are:
 
 | Simulator | VUnit name | cocotb interface |
 |-----------|------------|------------------|
