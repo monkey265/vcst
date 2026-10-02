@@ -80,6 +80,8 @@ class CocoTestRun(TestRun):
 
         if "GPI_USERS" not in os.environ:
             libpython = os.environ.get("LIBPYTHON_LOC") or find_libpython.find_libpython()
+            if libpython is None:
+                raise RuntimeError("Unable to find libpython, install it or set LIBPYTHON_LOC")
             environ["GPI_USERS"] = f"{libpython};{pygpi_entry_point()}"
 
         return environ

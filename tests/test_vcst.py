@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import find_libpython
 import pytest
 from vunit.test.report import FAILED, PASSED, SKIPPED
 
@@ -147,3 +148,11 @@ def test_vcst_test_decorator_with_and_without_arguments():
 
     assert vcst.test(check).attributes == []
     assert vcst.test(attributes=[".slow"])(check).attributes == [".slow"]
+
+
+def test_create_environ_without_libpython_is_a_clear_error(monkeypatch, tmp_path):
+    monkeypatch.delenv("GPI_USERS", raising=False)
+    monkeypatch.delenv("LIBPYTHON_LOC", raising=False)
+    monkeypatch.setattr(find_libpython, "find_libpython", lambda: None)
+    with pytest.raises(RuntimeError, match="libpython"):
+        make_run("nvc").create_environ(str(tmp_path))
