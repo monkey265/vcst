@@ -1,3 +1,4 @@
+import os
 from collections import OrderedDict
 from dataclasses import dataclass
 
@@ -89,8 +90,12 @@ class CocoTest(Test):
         self._vhdl = design_unit.is_entity
         self._cocotb_module = cocotb_module
         self._cocotb_module_location = cocotb_module_location
-        # Module the test function is defined in, which differs from cocotb_module for imported tests
-        self._cocotb_fullname = cocotb_test.fullname
+        # The name cocotb matches tests by in the simulator, which imports cocotb_module by its file name
+        # (COCOTB_TEST_MODULES). Tests imported from other modules keep the module they are defined in.
+        if cocotb_test.module == cocotb_module.__name__:
+            self._cocotb_fullname = f"{os.path.basename(cocotb_module_location)}.{cocotb_test.name}"
+        else:
+            self._cocotb_fullname = cocotb_test.fullname
 
 
 class CocoTestConfigurationVisitor(TestConfigurationVisitor):

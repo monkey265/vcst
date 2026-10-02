@@ -7,7 +7,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 import find_libpython
-from cocotb_tools.config import lib_name_path, pygpi_entry_point
+from cocotb_tools.config import lib_entry, lib_name_path, pygpi_entry_point
 
 from vunit.test.report import PASSED, SKIPPED, FAILED
 from vunit.ostools import write_file
@@ -180,7 +180,7 @@ def get_sim_flags(simulator_name, vhdl):
     if simulator_name == "rivierapro":
         flags = ["+access", "+w", "-interceptcoutput", "-O2"]
         if vhdl:
-            flags += [f"-loadvhpi {lib_name_path('vhpi', 'riviera')}"]
+            flags += [f"-loadvhpi {lib_entry('vhpi', 'riviera')}"]  # needs lib:entry_function
         else:
             flags += [f"-pli {lib_name_path('vpi', 'riviera')}"]
         return {"rivierapro.vsim_flags": flags}

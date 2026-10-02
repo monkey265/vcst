@@ -11,6 +11,7 @@ from vunit.test.report import FAILED, PASSED, SKIPPED
 
 import vcst
 from vcst import VCST
+from vcst.test.bench import CocoTest
 from vcst.test.suites import CocoTestRun, cocotb_run_env, get_sim_flags, simulation_env
 
 EXAMPLES = Path(__file__).parent / "vhdl"
@@ -156,3 +157,16 @@ def test_create_environ_without_libpython_is_a_clear_error(monkeypatch, tmp_path
     monkeypatch.setattr(find_libpython, "find_libpython", lambda: None)
     with pytest.raises(RuntimeError, match="libpython"):
         make_run("nvc").create_environ(str(tmp_path))
+
+
+def test_cocotb_fullname_uses_simulator_module_name():
+    design_unit = SimpleNamespace(file_name="adder.vhd", is_entity=True)
+    module = SimpleNamespace(__name__="tests.hdl.test_adder", top_level="adder")
+
+    def cocotb_test(module_name):
+        return SimpleNamespace(name="basic", module=module_name, fullname=f"{module_name}.basic")
+
+    own = CocoTest(cocotb_test("tests.hdl.test_adder"), design_unit, module, "/x/hdl/test_adder")
+    imported = CocoTest(cocotb_test("common_tests"), design_unit, module, "/x/hdl/test_adder")
+    assert own._cocotb_fullname == "test_adder.basic"
+    assert imported._cocotb_fullname == "common_tests.basic"
