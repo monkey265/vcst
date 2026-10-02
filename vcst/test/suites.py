@@ -161,6 +161,10 @@ def get_sim_flags(simulator_name, vhdl):
     if simulator_name == "ghdl":
         return {"ghdl.sim_flags": [f"--vpi={lib_name_path('vpi', 'ghdl')}"]}
 
+    if simulator_name == "nvc":
+        # --load is a run (-r) option, so it goes in sim_flags rather than global_flags.
+        return {"nvc.sim_flags": [f"--load={lib_name_path('vhpi', 'nvc')}"]}
+
     if simulator_name == "modelsim":
         if vhdl:
             # VUnit space-joins vsim_flags into a Tcl eval, so the -foreign value needs Tcl braces.
