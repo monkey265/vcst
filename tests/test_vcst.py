@@ -74,7 +74,8 @@ def test_configure_simulator_keeps_user_flags_and_gui_flags():
 
 
 @pytest.mark.parametrize("simulator_name", ["nvc", "modelsim"])
-def test_create_environ(simulator_name, tmp_path):
+def test_create_environ(simulator_name, tmp_path, monkeypatch):
+    monkeypatch.delenv("COCOTB_RANDOM_SEED", raising=False)
     env = make_run(simulator_name).create_environ(str(tmp_path))
     assert env["COCOTB_TEST_MODULES"] == "test_adder"
     assert env["COCOTB_TOPLEVEL"] == "adder"
@@ -189,5 +190,11 @@ def test_duplicate_cocotb_test_names_are_an_error():
 
 def test_cocotb_seed_from_hex_and_free_form_vunit_seeds():
     assert get_cocotb_seed("00000000000000ff") == 255
+    assert get_cocotb_seed("255") == 255
     assert get_cocotb_seed("nightly_run") == get_cocotb_seed("nightly_run")
     assert get_cocotb_seed("nightly_run") != get_cocotb_seed("weekly_run")
+
+
+def test_user_cocotb_random_seed_is_kept(monkeypatch, tmp_path):
+    monkeypatch.setenv("COCOTB_RANDOM_SEED", "255")
+    assert "COCOTB_RANDOM_SEED" not in make_run("nvc").create_environ(str(tmp_path))
