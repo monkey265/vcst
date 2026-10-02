@@ -1,3 +1,4 @@
+import hashlib
 import os
 import re
 import sys
@@ -73,7 +74,7 @@ class CocoTestRun(TestRun):
             "COCOTB_RESULTS_FILE": get_result_file_name(output_path),
             "COCOTB_TEST_MODULES": mod_name,
             "COCOTB_TEST_FILTER": f"^({test_filter})$",
-            "COCOTB_RANDOM_SEED": str(int(self.get_seed(), 16)),
+            "COCOTB_RANDOM_SEED": str(get_cocotb_seed(self.get_seed())),
             "COCOTB_TOPLEVEL": self._top_level.lower() if self._vhdl else self._top_level,
             "TOPLEVEL_LANG": "vhdl" if self._vhdl else "verilog",
         }
@@ -186,6 +187,14 @@ def get_sim_flags(simulator_name, vhdl):
         return {"rivierapro.vsim_flags": flags}
 
     raise RuntimeError(f"vcst does not support cocotb tests on simulator {simulator_name!r}")
+
+
+def get_cocotb_seed(seed):
+    """cocotb needs an integer seed; VUnit's is 16 hex digits, or any string set with the seed sim option."""
+    try:
+        return int(seed, 16)
+    except ValueError:
+        return int(hashlib.blake2b(seed.encode(), digest_size=8).hexdigest(), 16)
 
 
 def get_result_file_name(output_path):

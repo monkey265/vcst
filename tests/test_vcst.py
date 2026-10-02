@@ -13,7 +13,7 @@ from vunit.test.report import FAILED, PASSED, SKIPPED
 import vcst
 from vcst import VCST
 from vcst.test.bench import CocoTest, CocoTestBench
-from vcst.test.suites import CocoTestRun, cocotb_run_env, get_sim_flags, simulation_env
+from vcst.test.suites import CocoTestRun, cocotb_run_env, get_cocotb_seed, get_sim_flags, simulation_env
 
 EXAMPLES = Path(__file__).parent / "vhdl"
 
@@ -185,3 +185,9 @@ def test_duplicate_cocotb_test_names_are_an_error():
     bench.design_unit = design_unit
     with pytest.raises(RuntimeError, match="Duplicate cocotb test name"):
         bench.discover_cocotb_tests(module, "/x/hdl/test_adder")
+
+
+def test_cocotb_seed_from_hex_and_free_form_vunit_seeds():
+    assert get_cocotb_seed("00000000000000ff") == 255
+    assert get_cocotb_seed("nightly_run") == get_cocotb_seed("nightly_run")
+    assert get_cocotb_seed("nightly_run") != get_cocotb_seed("weekly_run")
