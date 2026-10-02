@@ -76,6 +76,7 @@ def test_configure_simulator_keeps_user_flags_and_gui_flags():
 @pytest.mark.parametrize("simulator_name", ["nvc", "modelsim"])
 def test_create_environ(simulator_name, tmp_path, monkeypatch):
     monkeypatch.delenv("COCOTB_RANDOM_SEED", raising=False)
+    monkeypatch.delenv("COCOTB_RESOLVE_X", raising=False)
     env = make_run(simulator_name).create_environ(str(tmp_path))
     assert env["COCOTB_TEST_MODULES"] == "test_adder"
     assert env["COCOTB_TOPLEVEL"] == "adder"
@@ -85,6 +86,7 @@ def test_create_environ(simulator_name, tmp_path, monkeypatch):
     assert env["PYTHONPATH"].split(os.pathsep)[-1] == str(Path("/tests/hdl"))
     assert env["PYGPI_PYTHON_BIN"] == sys.executable
     assert env["TOPLEVEL_LANG"] == "vhdl"
+    assert env["COCOTB_RESOLVE_X"] == "ZEROS"
 
 
 def test_run_env_hook_only_applies_inside_simulation_env():

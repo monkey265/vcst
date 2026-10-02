@@ -76,6 +76,7 @@ class CocoTestRun(TestRun):
             "COCOTB_TEST_FILTER": f"^({test_filter})$",
             "COCOTB_TOPLEVEL": self._top_level.lower() if self._vhdl else self._top_level,
             "TOPLEVEL_LANG": "vhdl" if self._vhdl else "verilog",
+            "COCOTB_RESOLVE_X": os.environ.get("COCOTB_RESOLVE_X", "ZEROS"),
         }
 
         # A seed set by the user, as cocotb's failure report suggests, wins over VUnit's
