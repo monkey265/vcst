@@ -105,7 +105,7 @@ class VCST(VUnit):
         if hasattr(cocotb_module, "top_level_type"):
             top_level_type = getattr(cocotb_module, "top_level_type")
         else:
-            raise RuntimeError(f"top_level not defined in cocotb module {cocotb_module}")
+            raise RuntimeError(f"top_level_type not defined in cocotb module {cocotb_module}")
 
         if hasattr(cocotb_module, "top_level_library"):
             top_level_library = getattr(cocotb_module, "top_level_library")
@@ -121,8 +121,11 @@ class VCST(VUnit):
         if not isinstance(top_level_library, str):
             raise RuntimeError(f"top_level_library defined in cocotb module should be a string {cocotb_module}")
 
-        if top_level_type != "entity" or not top_level_type != "module":
-            raise RuntimeError(f"Invalid top level type {top_level_type} in cocotb module {cocotb_module} specified. Please specify either entity or module.")
+        if top_level_type not in ("entity", "module"):
+            raise RuntimeError(
+                f"Invalid top level type '{top_level_type}' in cocotb module {cocotb_module}. "
+                f"Please specify either 'entity' or 'module'."
+            )
         
         library = self.library(top_level_library)
         top_level_design_unit = None
