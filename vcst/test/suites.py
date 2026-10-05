@@ -22,7 +22,11 @@ _thread_local = threading.local()
 
 def cocotb_run_env(simulator_interface, env):
     """VUnit run_env hook merging the current test's cocotb environment into the simulator's."""
-    return {**env, **(getattr(_thread_local, "env", None) or {})}
+    cocotb_env = getattr(_thread_local, "env", None)
+    if not cocotb_env:
+        return env
+    # vcst selects tests with COCOTB_TEST_FILTER, and cocotb refuses to run if COCOTB_TESTCASE is also set
+    return {**{name: value for name, value in env.items() if name != "COCOTB_TESTCASE"}, **cocotb_env}
 
 
 @contextmanager

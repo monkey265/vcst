@@ -94,6 +94,8 @@ def test_run_env_hook_only_applies_inside_simulation_env():
     assert cocotb_run_env(None, base) == base
     with simulation_env({"COCOTB_TEST_MODULES": "mod"}):
         assert cocotb_run_env(None, base) == {"PATH": "/bin", "COCOTB_TEST_MODULES": "mod"}
+        # an inherited COCOTB_TESTCASE would make cocotb reject vcst's COCOTB_TEST_FILTER
+        assert cocotb_run_env(None, {**base, "COCOTB_TESTCASE": "x"}) == {"PATH": "/bin", "COCOTB_TEST_MODULES": "mod"}
     assert cocotb_run_env(None, base) == base
 
 
